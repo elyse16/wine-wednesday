@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Wine Wednesday</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,500;1,6..72,500&family=DM+Sans:wght@400;500;700&display=swap">
+<style>
+/* Layout: printed wine list. Paper background, ink rules, italic serif title, dotted-leader spot list, hairline bars with a forest-green group average. */
+:root{
+  --bg:#f8faf6; --surface:#f8faf6; --fg:#16201b; --muted:#66706a; --line:#e1e6df; --rule:#16201b;
+  --accent:#1f5c43; --accent-fg:#ffffff; --you:#e6efe9; --track:#eef2ec; --bar:#1f5c43; --warn:#8a5a00; --warn-bg:#f8eed2;
+  --c0:#16201b;--c1:#8a948e;--c2:#b9ad7e;--c3:#7a8fa3;--c4:#c4a59a;--c5:#9a8fb0;--c6:#c29a6b;--c7:#6fa39a;
+  --font-display:"Newsreader",Georgia,serif;
+  --font-body:"DM Sans",system-ui,-apple-system,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#121613; --surface:#121613; --fg:#eef2ec; --muted:#9aa59e; --line:#28312b; --rule:#eef2ec;
+  --accent:#6fc79b; --accent-fg:#0c1f15; --you:#1d2b23; --track:#1b231e; --bar:#6fc79b; --warn:#f0c872; --warn-bg:#3a2e12;
+  --c0:#eef2ec;--c1:#9aa59e;--c2:#cdbf8c;--c3:#8fa6bd;--c4:#d4b3a8;--c5:#b3a8c9;--c6:#d8ad7d;--c7:#86bdb3; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121613; --surface:#121613; --fg:#eef2ec; --muted:#9aa59e; --line:#28312b; --rule:#eef2ec;
+  --accent:#6fc79b; --accent-fg:#0c1f15; --you:#1d2b23; --track:#1b231e; --bar:#6fc79b; --warn:#f0c872; --warn-bg:#3a2e12;
+  --c0:#eef2ec;--c1:#9aa59e;--c2:#cdbf8c;--c3:#8fa6bd;--c4:#d4b3a8;--c5:#b3a8c9;--c6:#d8ad7d;--c7:#86bdb3; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 56px}
+.wrap{max-width:1080px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+h1,h2,h3{font-family:var(--font-display);margin:0;text-wrap:balance;font-weight:500}
+h1{font-size:clamp(40px,8vw,64px);line-height:1;font-style:italic;letter-spacing:-.02em}
+h2{font-size:30px;line-height:1.1;letter-spacing:-.01em}
+h3{font-size:11px;text-transform:uppercase;letter-spacing:.16em;color:var(--muted);font-family:var(--font-body);font-weight:700}
+.top{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end;justify-content:space-between;border-bottom:1px solid var(--rule);padding-bottom:20px}
+.top .r{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap}
+.sub{color:var(--muted);margin:8px 0 0;font-size:14px}
+label.name{display:flex;flex-direction:column;gap:4px;font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);font-weight:700}
+input[type=text],input[type=date]{font:inherit;color:var(--fg);background:transparent;border:1px solid var(--line);border-radius:2px;padding:8px 10px;min-width:0;text-transform:none;letter-spacing:0;font-weight:400}
+input:focus-visible,button:focus-visible,summary:focus-visible,.spot:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button{font:inherit;font-weight:700;cursor:pointer;border-radius:2px;border:1px solid var(--accent);background:var(--accent);color:var(--accent-fg);padding:9px 16px}
+button.ghost{background:transparent;color:var(--accent)}
+button.link{border:0;padding:0;font-weight:500;text-decoration:underline}
+button:disabled{opacity:.5;cursor:default}
+.banner{background:var(--warn-bg);color:var(--warn);border-radius:2px;padding:10px 14px;display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between}
+.grid{display:grid;grid-template-columns:310px minmax(0,1fr);gap:40px;align-items:start}
+@media(max-width:780px){.grid{grid-template-columns:minmax(0,1fr);gap:28px}}
+.side,.main{display:flex;flex-direction:column;gap:16px;min-width:0}
+details.add{border:1px solid var(--line);border-radius:2px;padding:10px 14px}
+details.add summary{cursor:pointer;font-weight:700;color:var(--accent)}
+details.add form{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.todo{background:var(--you);border:1px solid var(--accent);border-radius:2px;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.todo-row{display:flex;flex-direction:column;gap:6px}
+.todo-row b{font-family:var(--font-display);font-weight:500;font-size:18px}
+.todo-row .d{display:block;color:var(--muted);font-size:13px}
+.todo-row button{padding:6px 12px;font-size:14px}
+.spots{display:flex;flex-direction:column}
+.spot{display:grid;grid-template-columns:auto minmax(12px,1fr) auto;column-gap:8px;row-gap:0;align-items:baseline;padding:11px 8px;border:0;border-bottom:1px solid var(--line);border-radius:0;cursor:pointer;background:none;color:var(--fg);text-align:left;font-weight:400}
+.spot[aria-current=true]{background:var(--you)}
+.spot b{font-family:var(--font-display);font-size:20px;font-weight:500;line-height:1.2}
+.spot .lead{border-bottom:1px dotted var(--muted);transform:translateY(-4px)}
+.spot .d{grid-column:1/3;grid-row:2;color:var(--muted);font-size:12px}
+.spot .s{font-family:var(--font-display);font-size:22px;font-weight:500;color:var(--accent);font-variant-numeric:tabular-nums;text-align:right}
+.spot .s small{display:block;font-size:11px;font-family:var(--font-body);color:var(--muted);font-weight:400}
+.spot .s.hid{font-family:var(--font-body);font-size:13px;font-weight:700;grid-row:1/3;grid-column:3;align-self:center}
+.seg{display:flex;gap:22px;border-bottom:1px solid var(--line)}
+.seg button{border:0;border-bottom:2px solid transparent;border-radius:0;background:transparent;color:var(--muted);font-weight:500;padding:6px 0;margin-bottom:-1px}
+.seg button[aria-pressed=true]{color:var(--fg);border-bottom-color:var(--accent);font-weight:700}
+.panel{display:flex;flex-direction:column;gap:22px;min-width:0}
+.head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;align-items:flex-end}
+.head .when{color:var(--muted);margin-top:4px}
+.big{font-family:var(--font-display);font-size:64px;line-height:.9;font-weight:500;color:var(--accent);font-variant-numeric:tabular-nums;text-align:right}
+.big small{display:block;font-family:var(--font-body);font-size:12px;font-weight:500;color:var(--muted);margin-top:6px}
+.gate{border:1px solid var(--line);border-radius:2px;padding:22px;display:flex;flex-direction:column;gap:12px;align-items:flex-start}
+.gate h2{font-size:26px;font-style:italic}
+.group{display:flex;flex-direction:column;gap:12px}
+.q{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr) 38px;gap:4px 12px;align-items:center}
+.q .t b{font-weight:500}.q .t span{display:block;color:var(--muted);font-size:13px}
+.q output{font-family:var(--font-display);font-weight:500;font-size:24px;text-align:right;font-variant-numeric:tabular-nums}
+@media(max-width:520px){.q{grid-template-columns:minmax(0,1fr) 38px}.q .sl{grid-column:1/3;grid-row:2}}
+.q.skip .t b,.q.skip output{color:var(--muted)}
+.q.skip .sl{opacity:.35}
+.sl{min-width:0}
+.ends{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:13px;color:var(--muted)}.legend b{color:var(--fg);font-weight:700}
+label.na{display:inline-flex;align-items:center;gap:6px;margin-top:4px;font-size:13px;color:var(--muted);cursor:pointer}
+input[type=range]{width:100%;accent-color:var(--accent);min-width:0}
+textarea{font:inherit;color:var(--fg);background:transparent;border:1px solid var(--line);border-radius:2px;padding:8px 10px;width:100%;min-height:56px;resize:vertical}
+.actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.msg{color:var(--muted);font-size:13px}
+/* spot detail chart: horizontal hairline bars */
+.chart{display:flex;flex-direction:column;gap:6px}
+.crow{display:grid;grid-template-columns:150px minmax(0,1fr) 44px;gap:10px;align-items:center}
+.crow .lab{font-size:14px}
+.crow .val{font-family:var(--font-display);font-weight:500;font-size:20px;text-align:right;font-variant-numeric:tabular-nums;color:var(--accent)}
+.crow.tot .lab{font-weight:700}
+.crow.tot .track{height:30px}
+.crow.axis{color:var(--muted);font-size:11px}
+.crow.axis .ticks{display:flex;justify-content:space-between}
+.crow.cg{margin-top:12px}
+.track{position:relative;height:24px;background-image:linear-gradient(to right,transparent calc(50% - .5px),var(--line) calc(50% - .5px),var(--line) calc(50% + .5px),transparent calc(50% + .5px)),linear-gradient(var(--line),var(--line));background-size:100% 100%,100% 1px;background-position:0 0,0 50%;background-repeat:no-repeat}
+.bar{position:absolute;left:0;top:50%;height:6px;transform:translateY(-50%);background:var(--bar)}
+.crow.tot .bar{height:8px}
+.dot{position:absolute;top:50%;width:8px;height:8px;border-radius:50%;background:var(--fg);opacity:.75;transform:translate(calc(-50% + var(--dx,0px)),-50%)}
+.dot.me{width:14px;height:14px;box-sizing:border-box;background:var(--bg);border:2px solid var(--accent);opacity:1;z-index:2}
+@media(max-width:560px){.crow{grid-template-columns:minmax(0,1fr) 44px}.crow .track{grid-column:1/3;grid-row:2}.crow.axis .lab,.crow.axis .val{display:none}.crow.axis .ticks{grid-column:1/3}}
+details.tbl summary{cursor:pointer;color:var(--accent);font-weight:700}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:2px;margin-top:10px}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{padding:8px 12px;text-align:center;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child{text-align:left;position:sticky;left:0;background:var(--bg)}
+thead th{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
+tr.grp td{background:var(--track);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);text-align:left}
+tr.tot td{font-weight:700;border-bottom:0}
+.you{background:var(--you)}td.avg{font-weight:700;color:var(--accent)}
+.notes{display:flex;flex-direction:column;gap:6px;margin:0;padding:0;list-style:none}
+.empty{color:var(--muted);padding:28px 8px;text-align:center}
+/* all spots: grouped vertical hairline bars */
+.key{display:inline-flex;align-items:center;gap:6px}
+.sw{width:12px;height:12px;border-radius:50%;display:inline-block}.sw.avg{background:var(--accent)}
+.ov{display:flex;gap:8px;align-items:flex-start}
+.yax{height:260px;display:flex;flex-direction:column;justify-content:space-between;font-size:11px;color:var(--muted);text-align:right;width:20px;flex:none}
+.scroll{flex:1;min-width:0;overflow-x:auto;padding-top:22px;margin-top:-22px}
+.plot{position:relative;width:max-content;min-width:100%}
+.glines{position:absolute;left:0;right:0;top:0;height:260px;pointer-events:none;
+  background:linear-gradient(var(--line),var(--line)) top/100% 1px no-repeat,linear-gradient(var(--line),var(--line)) center/100% 1px no-repeat,linear-gradient(var(--line),var(--line)) bottom/100% 1px no-repeat}
+.clusters{position:relative;display:flex;gap:6px;justify-content:space-around}
+.cl{display:flex;flex-direction:column;align-items:center;flex:0 0 auto;min-width:104px;padding:0 6px}
+.bars{height:260px;display:flex;align-items:flex-end;gap:4px}
+.pb{width:7px;position:relative;min-height:2px}
+.pb.me{outline:1px solid var(--fg);outline-offset:2px;z-index:1}
+.pb.avgb{width:13px;background:var(--accent)}
+.pb .av{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);font-family:var(--font-display);font-weight:500;font-size:19px;color:var(--accent);padding-bottom:2px;font-variant-numeric:tabular-nums}
+.cl-lab{background:none;border:0;border-radius:0;color:var(--fg);padding:10px 0 0;text-align:center;display:flex;flex-direction:column;gap:1px;cursor:pointer;font-weight:400}
+.cl-lab b{font-family:var(--font-display);font-size:16px;font-weight:500;line-height:1.2;text-wrap:balance}
+.cl-lab span{color:var(--muted);font-size:12px}
+body{margin:0}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1>Wine Wednesday</h1>
+      <p class="sub">One bar a week. Everyone scores it alone, then we compare.</p>
+    </div>
+    <div class="r">
+      <label class="name">Rating as
+        <input type="text" id="who" maxlength="24" placeholder="Your name" autocomplete="off">
+      </label>
+    </div>
+  </div>
+  <div id="banner"></div>
+  <div id="app" class="grid"><div class="empty">Loading the cellar…</div></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script>
+<script>
+const GROUPS=[
+ {name:"The room",qs:[
+  ["atmos","Atmosphere","The vibe, decor and seating"],
+  ["music","Music","Good playlist, at a volume you can talk over"],
+  ["bath","Bathroom","Clean, stocked, no line"]]},
+ {name:"The glass",qs:[
+  ["sel","Wine selection","Range, by-the-glass list, interesting bottles"],
+  ["qual","Wine quality","What was actually in the glass"],
+  ["value","Price","10 means a great deal for what you got"]]},
+ {name:"The table",qs:[
+  ["food","Food and snacks","Anything that went with the wine"],
+  ["svc","Service","Friendly, fast, knows the list"]]},
+ {name:"The verdict",qs:[
+  ["guest","Out-of-towner test","Would you bring someone visiting?"],
+  ["back","Would you come back","Without being talked into it"]]}
+];
+const ANCHOR={atmos:["Depressing","Want to move in"],music:["Wrong music","Great playlist"],bath:["Avoid","Spotless"],
+ sel:["Boring","Want it all"],qual:["Undrinkable","Memorable"],value:["Rip-off","Steal"],
+ food:["Sad nuts","Order again"],svc:["Ignored","Looked after"],guest:["Never","Immediately"],back:["Never again","Next week"]};
+const KEYS=GROUPS.flatMap(g=>g.qs.map(q=>q[0]));
+const $=id=>document.getElementById(id);
+const S={db:null,uid:null,spots:[],ratings:[],sel:null,view:"spot",formFor:null,draft:null,note:"",editing:null,
+  sort:"best"};
+const mean=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
+const f1=n=>n==null?"–":(Math.round(n*10)/10).toFixed(1);
+function h(tag,attrs,...kids){const e=document.createElement(tag);
+  for(const[k,v]of Object.entries(attrs||{})){if(k==="class")e.className=v;else if(k.startsWith("on"))e.addEventListener(k.slice(2),v);else if(v===true)e.setAttribute(k,"");else if(v!==false&&v!=null)e.setAttribute(k,v)}
+  for(const k of kids.flat())if(k!=null&&k!==false)e.append(k.nodeType?k:document.createTextNode(k));return e}
+function fmtDate(d){if(!d)return"Date not set";const[y,m,dd]=d.split("-").map(Number);
+  return new Date(y,m-1,dd).toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric",year:"numeric"})}
+const lsGet=k=>{try{return localStorage.getItem(k)||""}catch(e){return""}};
+const lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
+const todayStr=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
+
+/* data access: real database, or in-memory sample data in demo mode */
+const SP=()=>S.spots;
+const RT=()=>S.ratings;
+const idFor=n=>n.trim().toLowerCase().replace(/\s+/g," ");
+const ME=()=>idFor($("who").value);
+const byDateDesc=(a,b)=>(b.date||"").localeCompare(a.date||"");
+const myDoc=id=>RT().find(r=>r.spotId===id&&r.uid===ME());
+const wentList=id=>RT().filter(r=>r.spotId===id&&!r.didntGo&&r.scores);
+const skippedList=id=>RT().filter(r=>r.spotId===id&&r.didntGo);
+const overall=r=>mean(KEYS.map(k=>r.scores?.[k]).filter(v=>typeof v==="number"));
+const spotAvg=id=>myDoc(id)?mean(wentList(id).map(overall).filter(v=>v!=null)):null;
+const pending=()=>SP().filter(s=>!myDoc(s.id)).sort(byDateDesc);
+const who=()=>$("who").value.trim();
+
+let flashT;
+function flash(msg){const b=$("banner");b.replaceChildren(h("div",{class:"banner"},msg));clearTimeout(flashT);flashT=setTimeout(()=>{if(b.firstChild&&b.firstChild.textContent===msg)renderBanner()},4000)}
+function renderBanner(){const b=$("banner");b.replaceChildren();
+  if(!who())b.append(h("div",{class:"banner"},"Type your name in the box at the top to get started."));
+}
+function needName(){if(who())return true;flash("Add your name at the top first.");$("who").focus();return false}
+
+async function saveMine(spot,data){
+  const row={spot_id:spot.id,rater_id:ME(),name:who(),did_not_go:!!data.didntGo,scores:data.scores||null,note:data.note||"",updated_at:new Date().toISOString()};
+  const{error}=await sb.from("ratings").upsert(row,{onConflict:"spot_id,rater_id"});
+  if(error)throw error;
+  await load(true);
+}
+async function wasntThere(spot){
+  if(!needName())return;
+  try{await saveMine(spot,{didntGo:true});S.formFor=null;render()}catch(e){flash("Couldn't save. Check your connection and try again.")}
+}
+function openForm(id){
+  const mine=myDoc(id);
+  S.draft=Object.fromEntries(KEYS.map(k=>[k,mine?.scores&&k in mine.scores?mine.scores[k]:7]));
+  S.note=mine?.note||"";S.formFor=id;
+}
+
+function render(){
+  renderBanner();
+  const app=$("app");app.replaceChildren();
+  const spots=[...SP()].sort(byDateDesc);
+  if(!S.sel||!spots.find(s=>s.id===S.sel))S.sel=(pending()[0]||spots[0])?.id||null;
+  const side=h("div",{class:"side"});
+  const pend=pending();
+  if(pend.length)side.append(h("div",{class:"todo"},h("h3",{},"Waiting on you"),
+    pend.map(s=>h("div",{class:"todo-row"},
+      h("div",{},h("b",{},s.name),h("span",{class:"d"},fmtDate(s.date))),
+      h("div",{class:"actions"},
+        h("button",{onclick:()=>{S.sel=s.id;S.view="spot";openForm(s.id);render()}},"Rate it"),
+        h("button",{class:"ghost",onclick:()=>wasntThere(s)},"I wasn't there"))))));
+  side.append(addForm());
+  if(spots.length){
+    const list=h("div",{class:"spots"});
+    for(const s of spots){
+      const n=wentList(s.id).length,vis=!!myDoc(s.id);
+      list.append(h("button",{class:"spot","aria-current":s.id===S.sel&&S.view==="spot",onclick:()=>{S.sel=s.id;S.view="spot";render()}},
+        h("b",{},s.name),vis?h("span",{class:"lead"}):h("span"),h("span",{class:"d"},fmtDate(s.date)),
+        vis?h("span",{class:"s"},f1(spotAvg(s.id)))
+           :h("span",{class:"s hid"},"Your turn",h("small",{},"scores hidden")),null));
+    }
+    side.append(h("h3",{},"The list, newest first"),list);
+  }
+  app.append(side);
+  const main=h("div",{class:"main"});
+  if(spots.length){
+    main.append(h("div",{class:"seg",role:"group","aria-label":"View"},
+      h("button",{"aria-pressed":S.view==="spot",onclick:()=>{S.view="spot";render()}},"This spot"),
+      h("button",{"aria-pressed":S.view==="rank",onclick:()=>{S.view="rank";render()}},"All spots")));
+  }
+  const spot=spots.find(s=>s.id===S.sel);
+  if(S.view==="rank"&&spots.length)main.append(allPanel());
+  else main.append(spot?detail(spot):h("div",{class:"panel"},h("div",{class:"empty"},"No spots yet. Add the first bar on the left, with the date you went.")));
+  app.append(main);
+}
+
+/* ---------- add / edit spot, with spelling and date guards ---------- */
+const norm=t=>t.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/^the\s+/,"").replace(/[^a-z0-9]/g,"");
+function lev(a,b){const d=Array.from({length:a.length+1},(_,i)=>[i,...Array(b.length).fill(0)]);for(let j=1;j<=b.length;j++)d[0][j]=j;
+  for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return d[a.length][b.length]}
+function similar(typed,exclude){const n=norm(typed);if(n.length<3)return null;
+  return S.spots.find(s=>s.id!==exclude&&s.name&&(()=>{const m=norm(s.name);return m===n||(n.length>=4&&(m.includes(n)||n.includes(m)))||lev(m,n)<=Math.max(1,Math.floor(Math.min(m.length,n.length)/5))})())||null}
+function nameField(id,value,exclude){
+  const input=h("input",{type:"text",id,maxlength:"60",placeholder:"Start typing the bar name",required:true,autocomplete:"off",list:id+"_list",value:value||""});
+  const names=[...new Set(S.spots.map(x=>x.name))];
+  const dl=h("datalist",{id:id+"_list"},names.map(n=>h("option",{value:n})));
+  const hint=h("div",{class:"msg"});
+  const check=()=>{hint.replaceChildren();const m=similar(input.value,exclude);
+    if(m&&m.name!==input.value.trim()){hint.append("Already in the list as "+m.name+". ",h("button",{type:"button",class:"ghost link",onclick:()=>{input.value=m.name;check()}},"Use that spelling"))}
+    else if(m)hint.append("Matches an existing spot, so the spelling stays consistent.")};
+  input.addEventListener("input",check);
+  return{input,nodes:[input,dl,hint]};
+}
+function dateField(id,value,exclude,btn){
+  const input=h("input",{type:"date",id,value:value||"",required:true});
+  const hint=h("div",{class:"msg"});
+  const check=()=>{hint.replaceChildren();const v=input.value;let bad=false;
+    if(v){const t=S.spots.find(x=>x.id!==exclude&&x.date===v);
+      if(t){bad=true;hint.append(fmtDate(v)+" is already taken by "+t.name+". ",
+        exclude?null:h("button",{type:"button",class:"ghost link",onclick:()=>{S.sel=t.id;S.view="spot";render()}},"Open it"))}
+      else{const[y,m,d]=v.split("-").map(Number);if(new Date(y,m-1,d).getDay()!==3)hint.append("Heads up: that isn't a Wednesday.")}}
+    input.setCustomValidity(bad?"Date already used":"");if(btn)btn.disabled=bad};
+  input.addEventListener("input",check);input.addEventListener("change",check);
+  return{input,nodes:[input,hint],check};
+}
+function addForm(){
+  const nf=nameField("newName","",null);
+  const btn=h("button",{type:"submit"},"Add spot");
+  const df=dateField("newDate",todayStr(),null,btn);const date=df.input;
+  const msg=h("div",{class:"msg"});
+  const f=h("form",{onsubmit:async e=>{e.preventDefault();
+    let nm=nf.input.value.trim().replace(/\s+/g," ");if(!nm||!date.value)return;
+    const m=S.spots.find(s=>norm(s.name)===norm(nm));if(m)nm=m.name;
+    if(S.spots.some(x=>x.date===date.value)){df.check();return}
+    btn.disabled=true;
+    try{const{data,error}=await sb.from("spots").insert({name:nm,date:date.value}).select().single();if(error)throw error;S.sel=data.id;S.view="spot";await load(true)}
+    catch(err){msg.textContent="Couldn't save. Check your connection and try again.";btn.disabled=false}}},
+    h("label",{class:"name"},"Where",nf.nodes),
+    h("label",{class:"name"},"Date we went",df.nodes),btn,msg);
+  df.check();
+  return h("details",{class:"add",open:!S.spots.length},h("summary",{},"Add a spot"),f);
+}
+function editBox(spot){
+  const nf=nameField("editName",spot.name,spot.id);
+  const saveBtn=h("button",{type:"submit"},"Save changes");
+  const df=dateField("editDate",spot.date,spot.id,saveBtn);const date=df.input;
+  const msg=h("div",{class:"msg"});
+  let armed=false;
+  const del=h("button",{type:"button",class:"ghost",onclick:async()=>{
+    if(!armed){armed=true;del.textContent="Tap again to delete this spot and its ratings";return}
+    del.disabled=true;
+    try{const{error}=await sb.from("spots").delete().eq("id",spot.id);if(error)throw error;S.editing=null;S.sel=null;S.formFor=null;await load(true)}
+    catch(e){msg.textContent="Couldn't delete.";del.disabled=false}}},"Delete spot");
+  return h("form",{class:"group",onsubmit:async e=>{e.preventDefault();
+    const nm=nf.input.value.trim().replace(/\s+/g," ");if(!nm||!date.value)return;
+    if(S.spots.some(x=>x.id!==spot.id&&x.date===date.value)){df.check();return}
+    try{const{error}=await sb.from("spots").update({name:nm,date:date.value}).eq("id",spot.id);if(error)throw error;S.editing=null;await load(true)}
+    catch(err){msg.textContent="Couldn't save."}}},
+    h("label",{class:"name"},"Name",nf.nodes),h("label",{class:"name"},"Date we went",df.nodes),
+    h("div",{class:"actions"},saveBtn,
+      h("button",{type:"button",class:"ghost",onclick:()=>{S.editing=null;render()}},"Cancel"),del),msg);
+}
+
+/* ---------- bar chart pieces ---------- */
+function track(avg,dots){
+  const t=h("div",{class:"track"});
+  const bar=h("div",{class:"bar"});bar.style.width=(avg==null?0:avg*10)+"%";t.append(bar);
+  const by={};dots.forEach(d=>(by[d.val]=by[d.val]||[]).push(d));
+  for(const arr of Object.values(by))arr.forEach((d,i)=>{
+    const me=d.uid===ME();
+    const dot=h("span",{class:"dot"+(me?" me":""),title:(me?"You":d.name||"Guest")+": "+f1(d.val)});
+    dot.style.left=(d.val*10)+"%";dot.style.setProperty("--dx",((i-(arr.length-1)/2)*9)+"px");t.append(dot)});
+  return t}
+function axisRow(){return h("div",{class:"crow axis"},h("span",{class:"lab"}),h("div",{class:"ticks"},h("span",{},"0"),h("span",{},"5"),h("span",{},"10")),h("span",{class:"val"}))}
+const legend=()=>h("div",{class:"legend"},h("span",{},h("b",{},"Bar"),"  group average"),h("span",{},h("b",{},"Dots"),"  each person"),h("span",{},h("b",{},"Ringed dot"),"  you"));
+
+function allPanel(){
+  const vis=SP().filter(s=>myDoc(s.id)&&wentList(s.id).length).map(s=>({s,avg:spotAvg(s.id)}));
+  const hidden=SP().filter(s=>!myDoc(s.id)).length;
+  vis.sort(S.sort==="date"?(a,b)=>(a.s.date||"").localeCompare(b.s.date||""):(a,b)=>b.avg-a.avg);
+  const people=[];
+  vis.forEach(r=>wentList(r.s.id).forEach(x=>{if(!people.find(p=>p.uid===x.uid))people.push({uid:x.uid,name:x.name})}));
+  people.sort((a,b)=>(a.uid===ME()?-1:b.uid===ME()?1:(a.name||"").localeCompare(b.name||"")));
+  const col=uid=>"var(--c"+(people.findIndex(p=>p.uid===uid)%8)+")";
+  const p=h("div",{class:"panel"},
+    h("div",{class:"head"},h("div",{},h("h2",{},"All spots"),h("div",{class:"msg"},"Everyone's overall score for every bar, next to the group average.")),
+      h("div",{class:"seg",role:"group","aria-label":"Sort"},
+        h("button",{"aria-pressed":S.sort!=="date",onclick:()=>{S.sort="best";render()}},"Best first"),
+        h("button",{"aria-pressed":S.sort==="date",onclick:()=>{S.sort="date";render()}},"By date"))));
+  if(!vis.length){p.append(h("div",{class:"empty"},"No visible scores yet. Answer a spot to see where it lands."));}
+  else{
+    p.append(h("div",{class:"legend"},
+      h("span",{class:"key"},h("i",{class:"sw avg"}),"Group average"),
+      people.map(x=>{const sw=h("i",{class:"sw"});sw.style.background=col(x.uid);return h("span",{class:"key"},sw,x.uid===ME()?"You":x.name||"Guest")})));
+    const row=h("div",{class:"clusters"});
+    vis.forEach(r=>{
+      const bars=h("div",{class:"bars"});
+      wentList(r.s.id).sort((a,b)=>people.findIndex(x=>x.uid===a.uid)-people.findIndex(x=>x.uid===b.uid)).forEach(x=>{
+        const v=overall(x);if(v==null)return;
+        const bar=h("div",{class:"pb"+(x.uid===ME()?" me":""),title:(x.uid===ME()?"You":x.name||"Guest")+": "+f1(v)});
+        bar.style.height=(v*10)+"%";bar.style.background=col(x.uid);bars.append(bar)});
+      const ab=h("div",{class:"pb avgb",title:"Group average: "+f1(r.avg)},h("span",{class:"av"},f1(r.avg)));
+      ab.style.height=(r.avg*10)+"%";bars.append(ab);
+      const lab=h("button",{class:"cl-lab",onclick:()=>{S.sel=r.s.id;S.view="spot";render()}},h("b",{},r.s.name.replace(/^Sample:\s*/,"")),h("span",{},fmtDate(r.s.date).replace(/,\s*\d{4}$/,"")));
+      row.append(h("div",{class:"cl"},bars,lab));
+    });
+    p.append(h("div",{class:"ov"},
+      h("div",{class:"yax"},h("span",{},"10"),h("span",{},"5"),h("span",{},"0")),
+      h("div",{class:"scroll"},h("div",{class:"plot"},h("div",{class:"glines"}),row))));
+  }
+  if(hidden)p.append(h("div",{class:"msg"},hidden+(hidden===1?" spot is":" spots are")+" left out until you answer "+(hidden===1?"it":"them")+"."));
+  return p;
+}
+
+function detail(spot){
+  const mine=myDoc(spot.id),vis=!!mine,formOpen=S.formFor===spot.id;
+  const went=wentList(spot.id).sort((a,b)=>(a.name||"").localeCompare(b.name||""));
+  const avg=spotAvg(spot.id);
+  const panel=h("div",{class:"panel"});
+  panel.append(h("div",{class:"head"},
+    h("div",{},h("h2",{},spot.name),h("div",{class:"when"},fmtDate(spot.date),[" · ",h("button",{class:"ghost link",onclick:()=>{S.editing=spot.id;render()}},"Edit")])),
+    vis&&went.length?h("div",{class:"big"},f1(avg),h("small",{},"group average")):null));
+  if(S.editing===spot.id)panel.append(editBox(spot));
+
+  if(!vis&&!formOpen){
+    const n=went.length;
+    panel.append(h("div",{class:"gate"},h("h2",{},"Were you there?"),
+      h("div",{class:"msg"},"Scores stay hidden until you answer, so nobody sways anybody. "+(n?n+(n===1?" friend has":" friends have")+" rated so far.":"Nobody has rated yet.")),
+      h("div",{class:"actions"},h("button",{onclick:()=>{openForm(spot.id);render()}},"Yes, rate it"),
+        h("button",{class:"ghost",onclick:()=>wasntThere(spot)},"I wasn't there"))));
+    return panel;
+  }
+
+  if(vis){
+    const skipped=skippedList(spot.id);
+    if(went.length){
+      const ch=h("div",{class:"chart"});
+      ch.append(legend(),axisRow());
+      const ov=went.map(r=>({uid:r.uid,name:r.name,val:overall(r)})).filter(d=>d.val!=null);
+      ch.append(h("div",{class:"crow tot"},h("span",{class:"lab"},"Overall"),track(avg,ov),h("span",{class:"val"},f1(avg))));
+      for(const g of GROUPS){
+        ch.append(h("div",{class:"crow cg"},h("h3",{},g.name),h("span"),h("span")));
+        for(const[k,l]of g.qs){
+          const ds=went.map(r=>({uid:r.uid,name:r.name,val:r.scores?.[k]})).filter(d=>typeof d.val==="number");
+          const a=mean(ds.map(d=>d.val));
+          ch.append(h("div",{class:"crow"},h("span",{class:"lab"},l),track(a,ds),h("span",{class:"val"},f1(a))));
+        }
+      }
+      panel.append(ch);
+      const thead=h("tr",{},h("th",{},"Category"),went.map(r=>h("th",{class:r.uid===ME()?"you":""},r.uid===ME()?"You":r.name||"Guest")),h("th",{},"Avg"));
+      const tb=h("tbody");
+      for(const g of GROUPS){
+        tb.append(h("tr",{class:"grp"},h("td",{colspan:String(went.length+2)},g.name)));
+        for(const[k,l]of g.qs){
+          const vals=went.map(r=>r.scores?.[k]).filter(v=>typeof v==="number");
+          tb.append(h("tr",{},h("td",{},l),went.map(r=>{const v=r.scores?.[k];return h("td",{class:r.uid===ME()?"you":""},typeof v==="number"?String(v):v===null?"n/a":"–")}),h("td",{class:"avg"},f1(mean(vals)))));
+        }
+      }
+      tb.append(h("tr",{class:"tot"},h("td",{},"Overall"),went.map(r=>h("td",{class:r.uid===ME()?"you":""},f1(overall(r)))),h("td",{class:"avg"},f1(avg))));
+      panel.append(h("details",{class:"tbl"},h("summary",{},"Scores by person"),h("div",{class:"tablewrap"},h("table",{},h("thead",{},thead),tb))));
+      const noted=went.filter(r=>r.note);
+      if(noted.length)panel.append(h("div",{class:"group"},h("h3",{},"Wine of the night and notes"),
+        h("ul",{class:"notes"},noted.map(r=>h("li",{},h("b",{},(r.uid===ME()?"You":r.name||"Guest")+": "),r.note)))));
+    }else panel.append(h("div",{class:"empty"},"Nobody who went has rated this spot yet."));
+    if(skipped.length)panel.append(h("div",{class:"msg"},"Wasn't there: "+skipped.map(r=>r.uid===ME()?"You":r.name||"Guest").join(", ")));
+    if(!formOpen){
+      panel.append(mine.didntGo
+        ?h("div",{class:"actions"},h("span",{class:"msg"},"You marked that you weren't there."),h("button",{class:"ghost",onclick:()=>{openForm(spot.id);render()}},"I went, rate it"))
+        :h("div",{class:"actions"},h("button",{class:"ghost",onclick:()=>{openForm(spot.id);render()}},"Edit my scores")));
+    }
+  }
+
+  if(formOpen)panel.append(scoreForm(spot,vis));
+  return panel;
+}
+
+function scoreForm(spot,vis){
+  const form=h("div",{class:"group"},h("h3",{},vis?"Your scores (editing)":"Your scores"),
+    h("div",{class:"legend"},h("span",{},h("b",{},"1"),"  we're never coming back"),h("span",{},h("b",{},"5"),"  fine, forgettable"),h("span",{},h("b",{},"10"),"  best we've had")),
+    h("div",{class:"msg"},"Whole numbers only. Tick n/a for anything you skipped, like snacks or the bathroom; skipped items stay out of the averages."));
+  for(const g of GROUPS){
+    const gg=h("div",{class:"group"},h("h3",{},g.name));
+    for(const[k,l,hint]of g.qs){
+      let last=S.draft[k]===null?7:S.draft[k];
+      const out=h("output",{},S.draft[k]===null?"n/a":String(S.draft[k]));
+      const row=h("div",{class:"q"+(S.draft[k]===null?" skip":"")});
+      const inp=h("input",{type:"range",id:"q_"+k,min:"1",max:"10",step:"1",value:String(last),"aria-label":l,disabled:S.draft[k]===null,
+        oninput:e=>{last=Number(e.target.value);S.draft[k]=last;out.textContent=e.target.value}});
+      const na=h("input",{type:"checkbox",id:"na_"+k,checked:S.draft[k]===null,
+        onchange:e=>{const on=e.target.checked;S.draft[k]=on?null:last;inp.disabled=on;out.textContent=on?"n/a":String(last);row.classList.toggle("skip",on)}});
+      const[lo,hi]=ANCHOR[k];
+      row.append(h("div",{class:"t"},h("b",{},l),h("span",{},hint),h("label",{class:"na"},na," Skip, n/a")),
+        h("div",{class:"sl"},inp,h("div",{class:"ends"},h("span",{},"1 "+lo),h("span",{},"10 "+hi))),out);
+      gg.append(row);
+    }
+    form.append(gg);
+  }
+  const note=h("textarea",{id:"note",maxlength:"300",placeholder:"Wine of the night, or anything worth remembering",oninput:e=>{S.note=e.target.value}});
+  note.value=S.note||"";
+  const status=h("span",{class:"msg"});
+  const save=h("button",{onclick:async()=>{
+    if(!needName())return;
+    save.disabled=true;status.textContent="Saving…";
+    try{await saveMine(spot,{scores:{...S.draft},note:S.note.trim()});S.formFor=null;render()}
+    catch(e){status.textContent="Couldn't save. Check your connection and try again.";save.disabled=false}}},vis?"Update my scores":"Submit and see everyone's scores");
+  form.append(note,h("div",{class:"actions"},save,
+    h("button",{class:"ghost",onclick:()=>{S.formFor=null;render()}},"Cancel"),status));
+  return form;
+}
+
+let sb;
+async function load(force){
+  const ae=document.activeElement;
+  const typing=ae&&ae.closest&&ae.closest("#app")&&/INPUT|TEXTAREA/.test(ae.tagName);
+  const [a,b]=await Promise.all([sb.from("spots").select("*"),sb.from("ratings").select("*")]);
+  if(a.error||b.error)throw(a.error||b.error);
+  S.spots=a.data.map(r=>({id:r.id,name:r.name,date:r.date}));
+  S.ratings=b.data.map(r=>({spotId:r.spot_id,uid:r.rater_id,name:r.name,didntGo:r.did_not_go,scores:r.scores,note:r.note,updatedAt:r.updated_at}));
+  if(force||!typing)render();
+}
+(async()=>{
+  $("who").value=lsGet("ww_name");
+  $("who").addEventListener("input",e=>{lsSet("ww_name",e.target.value);if(sb)render()});
+  const c=window.WW_CONFIG||{};
+  if(!c.url||!c.key||!window.supabase){$("app").replaceChildren(h("div",{class:"empty"},"Add your Supabase URL and key to config.js, then reload."));return}
+  sb=window.supabase.createClient(c.url,c.key);
+  try{await load(true)}catch(e){$("app").replaceChildren(h("div",{class:"empty"},"Couldn't load the ratings. Check config.js and your Supabase tables, then reload."));return}
+  sb.channel("ww").on("postgres_changes",{event:"*",schema:"public"},()=>load(false).catch(()=>{})).subscribe();
+  setInterval(()=>load(false).catch(()=>{}),30000);
+})();
+</script>
+</body>
+</html>
